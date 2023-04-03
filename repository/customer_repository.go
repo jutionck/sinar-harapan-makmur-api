@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"fmt"
+
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/model"
 	"gorm.io/gorm"
 )
@@ -90,10 +92,16 @@ func (c *customerRepository) GetByPhone(phone string) (*model.Customer, error) {
 	return &customer, nil
 }
 
-func (c *customerRepository) CreateCustomerVehicle(payload *model.Customer, association any) error {
-	if err := c.db.Model(payload).Association("Vehicles").Append(&association); err != nil {
+func (c *customerRepository) CreateCustomerVehicle(payload *model.Customer, association interface{}) error {
+	vehicle, ok := association.(*model.Vehicle)
+	if !ok {
+		return fmt.Errorf("invalid vehicle association")
+	}
+
+	if err := c.db.Model(vehicle).Association("Customers").Append(payload); err != nil {
 		return err
 	}
+
 	return nil
 }
 

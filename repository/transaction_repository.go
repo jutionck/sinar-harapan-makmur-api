@@ -17,7 +17,7 @@ type transactionRepository struct {
 }
 
 func (t *transactionRepository) Create(payload *model.Transaction) error {
-	if err := t.db.Create(payload).Error; err != nil {
+	if err := t.db.Omit(clause.Associations).Create(payload).Error; err != nil {
 		return err
 	}
 	return nil

@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/model"
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/repository"
@@ -41,20 +42,27 @@ func (t *transactionUseCase) RegisterNewTransaction(payload *model.Transaction) 
 	}
 
 	// append customer vehicle
-	//err = t.customerUC.AppendCustomerVehicle(customer, vehicle)
-	//if err != nil {
-	//	return fmt.Errorf("failed to append customer vehicle")
-	//}
+	err = t.customerUC.AppendCustomerVehicle(customer, vehicle)
+	if err != nil {
+		return fmt.Errorf("failed to append customer vehicle")
+	}
 
-	payload.Vehicle = *vehicle
-	payload.Employee = *employee
-	payload.Customer = *customer
+	// validate stock
+	if vehicle.Stock < payload.Qty {
+		return fmt.Errorf("not enough stock")
+	}
 
 	//update stock
-	//err = t.vehicleUC.UpdateVehicleStock(payload.Qty, vehicle.ID)
-	//if err != nil {
-	//	return fmt.Errorf("failed to update stock")
-	//}
+	err = t.vehicleUC.UpdateVehicleStock(payload.Qty, vehicle.ID)
+	if err != nil {
+		return fmt.Errorf("failed to update stock")
+	}
+
+	payload.Vehicle = *vehicle
+	payload.Customer = *customer
+	payload.Employee = *employee
+	payload.TransactionDate = time.Now()
+	payload.PaymentAmount = int64(vehicle.SalePrice)
 
 	err = t.repo.Create(payload)
 	if err != nil {
@@ -65,11 +73,11 @@ func (t *transactionUseCase) RegisterNewTransaction(payload *model.Transaction) 
 }
 
 func (t *transactionUseCase) FindAllTransaction() ([]model.Transaction, error) {
-	return t.FindAllTransaction()
+	return t.repo.List()
 }
 
 func (t *transactionUseCase) FindByTransaction(id string) (model.Transaction, error) {
-	return t.FindByTransaction(id)
+	return t.repo.Get(id)
 }
 
 func NewTransactionUseCase(

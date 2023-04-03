@@ -55,7 +55,7 @@ func (v *vehicleRepository) Delete(id string) error {
 }
 
 func (v *vehicleRepository) UpdateStock(count int, id string) error {
-	result := v.db.Model(&model.Vehicle{}).Where("id=?", id).Update("stock = (stock - ?)", count)
+	result := v.db.Model(&model.Vehicle{}).Where("id=?", id).Update("stock", gorm.Expr("stock - ?", count))
 	if err := result.Error; err != nil {
 		return err
 	}
