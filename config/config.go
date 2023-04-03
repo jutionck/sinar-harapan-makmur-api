@@ -13,11 +13,16 @@ type DbConfig struct {
 	Name     string
 	User     string
 	Password string
-	Driver   string
+}
+
+type ApiConfig struct {
+	ApiPort string
+	ApiHost string
 }
 
 type Config struct {
 	DbConfig
+	ApiConfig
 }
 
 func (c *Config) ReadConfigFile() error {
@@ -32,11 +37,15 @@ func (c *Config) ReadConfigFile() error {
 		Name:     os.Getenv("DB_NAME"),
 		User:     os.Getenv("DB_USER"),
 		Password: os.Getenv("DB_PASSWORD"),
-		Driver:   os.Getenv("DB_DRIVER"),
+	}
+
+	c.ApiConfig = ApiConfig{
+		ApiPort: os.Getenv("API_PORT"),
+		ApiHost: os.Getenv("API_HOST"),
 	}
 
 	if c.DbConfig.Host == "" || c.DbConfig.Port == "" || c.DbConfig.Name == "" ||
-		c.DbConfig.User == "" || c.DbConfig.Password == "" || c.DbConfig.Driver == "" {
+		c.DbConfig.User == "" || c.DbConfig.Password == "" || c.ApiPort == "" || c.ApiHost == "" {
 		return errors.New("missing required environment variables")
 	}
 
