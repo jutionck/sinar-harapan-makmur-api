@@ -13,6 +13,7 @@ type Server struct {
 	vehicleUC  usecase.VehicleUseCase
 	brandUC    usecase.BrandUseCase
 	customerUC usecase.CustomerUseCase
+	employeeUC usecase.EmployeeUseCase
 	engine     *gin.Engine
 	host       string
 }
@@ -29,6 +30,7 @@ func (s *Server) initController() {
 	controller.NewVehicleController(s.engine, s.vehicleUC)
 	controller.NewBrandController(s.engine, s.brandUC)
 	controller.NewCustomerController(s.engine, s.customerUC)
+	controller.NewEmployeeController(s.engine, s.employeeUC)
 }
 
 func NewServer() *Server {
@@ -44,14 +46,17 @@ func NewServer() *Server {
 	vehicleRepo := repository.NewVehicleRepository(db)
 	brandRepo := repository.NewBrandRepository(db)
 	customerRepo := repository.NewCustomerRepository(db)
+	employeeRepo := repository.NewEmployeeRepository(db)
 	brandUC := usecase.NewBrandUseCase(brandRepo)
-	vehilceUC := usecase.NewVehicleUseCase(vehicleRepo, brandUC)
+	vehicleUC := usecase.NewVehicleUseCase(vehicleRepo, brandUC)
 	customerUC := usecase.NewCustomerUseCase(customerRepo)
+	employeeUC := usecase.NewEmployeeUseCase(employeeRepo)
 	host := fmt.Sprintf("%s:%s", c.ApiHost, c.ApiPort)
 	return &Server{
-		vehicleUC:  vehilceUC,
+		vehicleUC:  vehicleUC,
 		brandUC:    brandUC,
 		customerUC: customerUC,
+		employeeUC: employeeUC,
 		engine:     r,
 		host:       host}
 }
