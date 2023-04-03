@@ -7,6 +7,7 @@ import (
 
 type Vehicle struct {
 	BrandID        string     `json:"brandId"`
+	Brand          Brand      `json:"brand"`
 	Model          string     `gorm:"varchar;size:30" json:"model"`
 	ProductionYear int        `gorm:"size:4" json:"productionYear"`
 	Color          string     `gorm:"varchar;size:30" json:"color"`
@@ -14,7 +15,7 @@ type Vehicle struct {
 	Stock          int        `gorm:"check:stock >= 0" json:"stock"`
 	SalePrice      int        `gorm:"check:sale_price > 0" json:"salePrice"`
 	Status         string     `gorm:"check:status IN ('baru', 'bekas')" json:"status"`
-	Customers      []Customer `gorm:"many2many:customer_vehicles;" json:"customers"`
+	Customers      []Customer `gorm:"many2many:customer_vehicles;" json:"customers,omitempty"`
 	BaseModel
 }
 

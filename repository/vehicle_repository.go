@@ -3,6 +3,7 @@ package repository
 import (
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/model"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type VehicleRepository interface {
@@ -24,7 +25,7 @@ func (v *vehicleRepository) Search(by map[string]interface{}) ([]model.Vehicle, 
 
 func (v *vehicleRepository) List() ([]model.Vehicle, error) {
 	var vehicles []model.Vehicle
-	result := v.db.Find(&vehicles)
+	result := v.db.Preload(clause.Associations).Find(&vehicles)
 	if err := result.Error; err != nil {
 		return nil, err
 	}

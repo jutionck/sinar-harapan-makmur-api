@@ -11,6 +11,7 @@ import (
 
 type Server struct {
 	vehicleUC usecase.VehicleUseCase
+	brandUC   usecase.BrandUseCase
 	engine    *gin.Engine
 	host      string
 }
@@ -25,6 +26,7 @@ func (s *Server) Run() {
 
 func (s *Server) initController() {
 	controller.NewVehicleController(s.engine, s.vehicleUC)
+	controller.NewBrandController(s.engine, s.brandUC)
 }
 
 func NewServer() *Server {
@@ -42,5 +44,9 @@ func NewServer() *Server {
 	brandUC := usecase.NewBrandUseCase(brandRepo)
 	vehilceUC := usecase.NewVehicleUseCase(vehicleRepo, brandUC)
 	host := fmt.Sprintf("%s:%s", c.ApiHost, c.ApiPort)
-	return &Server{vehicleUC: vehilceUC, engine: r, host: host}
+	return &Server{
+		vehicleUC: vehilceUC,
+		brandUC:   brandUC,
+		engine:    r,
+		host:      host}
 }

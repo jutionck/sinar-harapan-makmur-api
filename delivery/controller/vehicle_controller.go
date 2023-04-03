@@ -40,6 +40,7 @@ func (v *VehicleController) updateHandler(c *gin.Context) {
 
 func (v *VehicleController) listHandler(c *gin.Context) {
 	vehicles, err := v.usecase.FindAll()
+
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Failed to retrieve vehicle data"})
 		return
