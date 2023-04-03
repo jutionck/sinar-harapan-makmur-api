@@ -10,6 +10,7 @@ type CustomerRepository interface {
 	ListCustomerUser() ([]model.Customer, error)
 	GetByUser(userId string) (*model.Customer, error)
 	BaseRepositoryEmailPhone[model.Customer]
+	CreateCustomerVehicle(payload *model.Customer, association any) error
 }
 
 type customerRepository struct {
@@ -87,6 +88,13 @@ func (c *customerRepository) GetByPhone(phone string) (*model.Customer, error) {
 		return nil, result
 	}
 	return &customer, nil
+}
+
+func (c *customerRepository) CreateCustomerVehicle(payload *model.Customer, association any) error {
+	if err := c.db.Model(payload).Association("Vehicles").Append(&association); err != nil {
+		return err
+	}
+	return nil
 }
 
 func NewCustomerRepository(db *gorm.DB) CustomerRepository {

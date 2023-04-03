@@ -2,14 +2,15 @@ package usecase
 
 import (
 	"fmt"
-
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/model"
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/repository"
+	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/utils"
 )
 
 type CustomerUseCase interface {
 	BaseUseCase[model.Customer]
 	BaseUseCaseEmailPhone[model.Customer]
+	AppendCustomerVehicle(payload *model.Customer, association any) error
 }
 
 type customerUseCase struct {
@@ -44,6 +45,17 @@ func (c *customerUseCase) SaveData(payload *model.Customer) error {
 		}
 	}
 
+	// create user credential (recommended use transactional)
+	password, err := utils.HashPassword("password")
+	if err != nil {
+		return err
+	}
+	userCredential := model.UserCredential{
+		UserName: payload.Email,
+		Password: password,
+		IsActive: false,
+	}
+	payload.UserCredential = userCredential
 	return c.repo.Save(payload)
 }
 
@@ -69,6 +81,10 @@ func (c *customerUseCase) FindByPhone(phone string) (*model.Customer, error) {
 		return nil, fmt.Errorf("Customer with phone number %s not found!", phone)
 	}
 	return customer, nil
+}
+
+func (c *customerUseCase) AppendCustomerVehicle(payload *model.Customer, association any) error {
+	return c.repo.CreateCustomerVehicle(payload, association)
 }
 
 func NewCustomerUseCase(repo repository.CustomerRepository) CustomerUseCase {

@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"fmt"
+	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/utils"
 
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/model"
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/repository"
@@ -60,6 +61,17 @@ func (e *employeeUseCase) SaveData(payload *model.Employee) error {
 		payload.Manager = manager
 	}
 
+	// create user credential (recommended use transactional)
+	password, err := utils.HashPassword("password")
+	if err != nil {
+		return err
+	}
+	userCredential := model.UserCredential{
+		UserName: payload.Email,
+		Password: password,
+		IsActive: false,
+	}
+	payload.UserCredential = userCredential
 	return e.repo.Save(payload)
 }
 

@@ -8,6 +8,7 @@ import (
 
 type VehicleRepository interface {
 	BaseRepository[model.Vehicle]
+	UpdateStock(count int, id string) error
 }
 
 type vehicleRepository struct {
@@ -51,6 +52,14 @@ func (v *vehicleRepository) Save(payload *model.Vehicle) error {
 
 func (v *vehicleRepository) Delete(id string) error {
 	return v.db.Delete(&model.Vehicle{}, "id=?", id).Error
+}
+
+func (v *vehicleRepository) UpdateStock(count int, id string) error {
+	result := v.db.Model(&model.Vehicle{}).Where("id=?", id).Update("stock = (stock - ?)", count)
+	if err := result.Error; err != nil {
+		return err
+	}
+	return nil
 }
 
 func NewVehicleRepository(db *gorm.DB) VehicleRepository {

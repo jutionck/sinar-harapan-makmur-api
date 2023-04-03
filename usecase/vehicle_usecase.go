@@ -9,6 +9,7 @@ import (
 
 type VehicleUseCase interface {
 	BaseUseCase[model.Vehicle]
+	UpdateVehicleStock(count int, id string) error
 }
 
 type vehicleUseCase struct {
@@ -39,6 +40,10 @@ func (v *vehicleUseCase) SaveData(payload *model.Vehicle) error {
 
 func (v *vehicleUseCase) DeleteData(id string) error {
 	return v.repo.Delete(id)
+}
+
+func (v *vehicleUseCase) UpdateVehicleStock(count int, id string) error {
+	return v.repo.UpdateStock(count, id)
 }
 
 func NewVehicleUseCase(repo repository.VehicleRepository, brandUseCase BrandUseCase) VehicleUseCase {
