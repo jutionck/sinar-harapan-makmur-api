@@ -9,6 +9,7 @@ type BrandRepository interface {
 	BaseRepository[model.Brand]
 	ListBrandWithVehicle() ([]model.Brand, error)
 	GetBrandWithVehicle(brandId string) (*model.Brand, error)
+	CountByName(name string, id string) (int64, error)
 }
 
 type brandRepository struct {
@@ -66,6 +67,20 @@ func (b *brandRepository) ListBrandWithVehicle() ([]model.Brand, error) {
 		return nil, result
 	}
 	return brands, nil
+}
+
+func (b *brandRepository) CountByName(name string, id string) (int64, error) {
+	var count int64
+	var result *gorm.DB
+	if id != "" {
+		result = b.db.Model(&model.Brand{}).Where("name ILIKE ? AND id <> ?", "%"+name+"%", id).Count(&count)
+	} else {
+		result = b.db.Model(&model.Brand{}).Where("name ILIKE ?", "%"+name+"%").Count(&count)
+	}
+	if err := result.Error; err != nil {
+		return 0, err
+	}
+	return count, nil
 }
 
 func NewBrandRepository(db *gorm.DB) BrandRepository {
