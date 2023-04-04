@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/delivery/api"
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/model"
-	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/model/dto"
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/usecase"
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/utils/common"
 )
@@ -14,114 +13,65 @@ import (
 type VehicleController struct {
 	router  *gin.Engine
 	usecase usecase.VehicleUseCase
+	api.BaseApi
 }
 
 func (v *VehicleController) createHandler(c *gin.Context) {
 	var payload model.Vehicle
 	if err := c.ShouldBindJSON(&payload); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, api.SendErrorResponse(
-			dto.ResponseStatus{
-				Code:        http.StatusInternalServerError,
-				Description: err.Error(),
-			}))
-		return
+		v.NewErrorErrorResponse(c, http.StatusBadRequest, err.Error())
 	}
 	if err := v.usecase.SaveData(&payload); err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, api.SendErrorResponse(
-			dto.ResponseStatus{
-				Code:        http.StatusInternalServerError,
-				Description: err.Error(),
-			}))
-		return
+		v.NewErrorErrorResponse(c, http.StatusInternalServerError, err.Error())
 	}
-	c.JSON(http.StatusCreated, api.SendResponse(
-		payload, dto.ResponseStatus{
-			Code:        c.Writer.Status(),
-			Description: "OK",
-		}))
+
+	v.NewSuccessSingleResponse(c, payload, "OK")
 }
 
 func (v *VehicleController) updateHandler(c *gin.Context) {
 	var payload model.Vehicle
 	if err := c.ShouldBindJSON(&payload); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, api.SendErrorResponse(
-			dto.ResponseStatus{
-				Code:        http.StatusInternalServerError,
-				Description: err.Error(),
-			}))
-		return
+		v.NewErrorErrorResponse(c, http.StatusBadRequest, err.Error())
 	}
 	if err := v.usecase.SaveData(&payload); err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
-		return
+		v.NewErrorErrorResponse(c, http.StatusInternalServerError, err.Error())
 	}
-	c.JSON(http.StatusOK, api.SendResponse(
-		payload, dto.ResponseStatus{
-			Code:        c.Writer.Status(),
-			Description: "OK",
-		}))
+	v.NewSuccessSingleResponse(c, payload, "OK")
 }
 
 func (v *VehicleController) listHandler(c *gin.Context) {
 	requestQueryParams, err := common.ValidateRequestQueryParams(c)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, api.SendErrorResponse(
-			dto.ResponseStatus{
-				Code:        http.StatusInternalServerError,
-				Description: err.Error(),
-			}))
-		return
+		v.NewErrorErrorResponse(c, http.StatusBadRequest, err.Error())
 	}
 
 	vehicles, paging, err := v.usecase.Paging(requestQueryParams)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, api.SendErrorResponse(
-			dto.ResponseStatus{
-				Code:        http.StatusInternalServerError,
-				Description: err.Error(),
-			}))
-		return
+		v.NewErrorErrorResponse(c, http.StatusInternalServerError, err.Error())
 	}
 
 	var vehicleInterface []interface{}
 	for _, v := range vehicles {
 		vehicleInterface = append(vehicleInterface, v)
 	}
-	c.JSON(http.StatusOK, api.SendPageResponse(
-		vehicleInterface, dto.ResponseStatus{
-			Code:        c.Writer.Status(),
-			Description: "OK",
-		}, paging))
+	v.NewSuccessPageResponse(c, vehicleInterface, "OK", paging)
 }
 
 func (v *VehicleController) getByIDHandler(c *gin.Context) {
 	id := c.Param("id")
 	vehicle, err := v.usecase.FindById(id)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, api.SendErrorResponse(
-			dto.ResponseStatus{
-				Code:        http.StatusInternalServerError,
-				Description: err.Error(),
-			}))
+		v.NewErrorErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, api.SendResponse(
-		vehicle, dto.ResponseStatus{
-			Code:        c.Writer.Status(),
-			Description: "OK",
-		}))
+	v.NewSuccessSingleResponse(c, vehicle, "OK")
 }
 
 func (v *VehicleController) deleteHandler(c *gin.Context) {
 	id := c.Param("id")
 	err := v.usecase.DeleteData(id)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, api.SendErrorResponse(
-			dto.ResponseStatus{
-				Code:        http.StatusInternalServerError,
-				Description: err.Error(),
-			}))
-		return
+		v.NewErrorErrorResponse(c, http.StatusInternalServerError, err.Error())
 	}
 	c.String(http.StatusNoContent, "")
 }

@@ -1,25 +1,21 @@
 package api
 
-import "github.com/jutionck/golang-db-sinar-harapan-makmur-orm/model/dto"
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/delivery/api/response"
+	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/model/dto"
+)
 
-func SendResponse(data interface{}, status dto.ResponseStatus) *dto.SingleResponse {
-	return &dto.SingleResponse{
-		Status: status,
-		Data:   data,
-	}
+type BaseApi struct{}
+
+func (b *BaseApi) NewSuccessSingleResponse(c *gin.Context, data interface{}, responseType string) {
+	response.SendSingleResponse(c, data, responseType)
 }
 
-func SendPageResponse(data []interface{}, status dto.ResponseStatus, paging dto.Paging) *dto.PagedResponse {
-	return &dto.PagedResponse{
-		Status: status,
-		Data:   data,
-		Paging: paging,
-	}
+func (b *BaseApi) NewSuccessPageResponse(c *gin.Context, data []interface{}, responseType string, paging dto.Paging) {
+	response.SendPageResponse(c, data, responseType, paging)
 }
 
-func SendErrorResponse(status dto.ResponseStatus) *dto.ResponseStatus {
-	return &dto.ResponseStatus{
-		Code:        status.Code,
-		Description: status.Description,
-	}
+func (b *BaseApi) NewErrorErrorResponse(c *gin.Context, code int, errorMessage string) {
+	response.SendErrorResponse(c, code, errorMessage)
 }
