@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/config"
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/delivery/controller"
+	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/delivery/middleware"
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/repository"
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/usecase"
 )
@@ -45,6 +46,8 @@ func NewServer() *Server {
 	db := dbConn.Conn()
 
 	r := gin.Default()
+	r.Use(middleware.LogRequestMiddleware())
+	r.Use(middleware.LogResponseMiddleware())
 	vehicleRepo := repository.NewVehicleRepository(db)
 	brandRepo := repository.NewBrandRepository(db)
 	customerRepo := repository.NewCustomerRepository(db)

@@ -1,0 +1,2 @@
+time="2023-04-04T23:27:46+07:00" level=info msg="[LOG] : {0001-01-01 00:00:00 +0000 UTC 6.631585ms 200 127.0.0.1 GET /brands PostmanRuntime/7.31.3}\n"
+time="2023-04-04T23:27:58+07:00" level=info msg="[LOG] : {0001-01-01 00:00:00 +0000 UTC 13.071713ms 500 127.0.0.1 PUT /brands PostmanRuntime/7.31.3}\n"
