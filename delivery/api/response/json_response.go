@@ -7,8 +7,8 @@ import (
 )
 
 func SendSingleResponse(c *gin.Context, data interface{}, responseType string) {
-	c.JSON(http.StatusOK, &dto.SingleResponse{
-		Status: dto.ResponseStatus{
+	c.JSON(http.StatusOK, &SingleResponse{
+		Status: Status{
 			Code:        http.StatusOK,
 			Description: responseType,
 		},
@@ -17,8 +17,8 @@ func SendSingleResponse(c *gin.Context, data interface{}, responseType string) {
 }
 
 func SendPageResponse(c *gin.Context, data []interface{}, responseType string, paging dto.Paging) {
-	c.JSON(http.StatusOK, &dto.PagedResponse{
-		Status: dto.ResponseStatus{
+	c.JSON(http.StatusOK, &PagedResponse{
+		Status: Status{
 			Code:        http.StatusOK,
 			Description: responseType,
 		},
@@ -28,7 +28,7 @@ func SendPageResponse(c *gin.Context, data []interface{}, responseType string, p
 }
 
 func SendErrorResponse(c *gin.Context, code int, errorMessage string) {
-	c.AbortWithStatusJSON(code, &dto.ResponseStatus{
+	c.AbortWithStatusJSON(code, &Status{
 		Code:        code,
 		Description: errorMessage,
 	})

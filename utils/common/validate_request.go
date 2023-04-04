@@ -28,9 +28,8 @@ func ValidateRequestQueryParams(c *gin.Context) (dto.RequestQueryParams, error) 
 			Sort:  sort,
 		},
 		PaginationParam: dto.PaginationParam{
-			Page:   page,
-			Offset: (page - 1) * limit,
-			Limit:  limit,
+			Page:  page,
+			Limit: limit,
 		},
 	}, nil
 }

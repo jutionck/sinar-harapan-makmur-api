@@ -30,11 +30,7 @@ func GetPaginationParams(params dto.PaginationParam) dto.PaginationQuery {
 		take = params.Limit
 	}
 
-	if page > 0 {
-		skip = (page - 1) * take
-	} else {
-		skip = 0
-	}
+	skip = (page - 1) * take
 
 	return dto.PaginationQuery{
 		Page: page,
