@@ -19,7 +19,7 @@ type Vehicle struct {
 	BaseModel
 }
 
-func (Vehicle) TableName() string {
+func (v *Vehicle) TableName() string {
 	return "mst_vehicle"
 }
 
