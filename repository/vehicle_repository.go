@@ -1,19 +1,13 @@
 package repository
 
 import (
-	"errors"
-	"fmt"
-
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/model"
-	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/model/dto"
-	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/utils/common"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
 type VehicleRepository interface {
 	BaseRepository[model.Vehicle]
-	BaseRepositoryPaging[model.Vehicle]
 	UpdateStock(count int, id string) error
 }
 
@@ -67,37 +61,6 @@ func (v *vehicleRepository) UpdateStock(count int, id string) error {
 	}
 	return nil
 }
-
-func (v *vehicleRepository) Paging(requestQueryParams dto.RequestQueryParams) ([]model.Vehicle, dto.Paging, error) {
-	var paginationQuery dto.PaginationQuery
-	var vehicles []model.Vehicle
-	paginationQuery = common.GetPaginationParams(requestQueryParams.PaginationParam)
-	orderQuery := "id"
-	if requestQueryParams.QueryParams.Order != "" && requestQueryParams.QueryParams.Sort != "" {
-		sorting := "ASC"
-		if requestQueryParams.QueryParams.Sort == "desc" {
-			sorting = "DESC"
-		}
-		orderQuery = fmt.Sprintf("%s %s", requestQueryParams.QueryParams.Order, sorting)
-	}
-
-	res := v.db.Order(orderQuery).Limit(paginationQuery.Take).Offset(paginationQuery.Skip).Find(&vehicles)
-	if err := res.Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, dto.Paging{}, nil
-		} else {
-			return nil, dto.Paging{}, err
-		}
-	}
-
-	var totalRows int64
-	err := v.db.Model(&model.Vehicle{}).Count(&totalRows).Error
-	if err != nil {
-		return nil, dto.Paging{}, err
-	}
-	return vehicles, common.Paginate(paginationQuery.Page, paginationQuery.Take, int(totalRows)), nil
-}
-
 func NewVehicleRepository(db *gorm.DB) VehicleRepository {
 	return &vehicleRepository{db: db}
 }
