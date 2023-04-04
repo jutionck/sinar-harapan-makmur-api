@@ -20,9 +20,11 @@ func (v *VehicleController) createHandler(c *gin.Context) {
 	var payload model.Vehicle
 	if err := c.ShouldBindJSON(&payload); err != nil {
 		v.NewErrorErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
 	}
 	if err := v.usecase.SaveData(&payload); err != nil {
 		v.NewErrorErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
 	}
 
 	v.NewSuccessSingleResponse(c, payload, "OK")
@@ -32,9 +34,11 @@ func (v *VehicleController) updateHandler(c *gin.Context) {
 	var payload model.Vehicle
 	if err := c.ShouldBindJSON(&payload); err != nil {
 		v.NewErrorErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
 	}
 	if err := v.usecase.SaveData(&payload); err != nil {
 		v.NewErrorErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
 	}
 	v.NewSuccessSingleResponse(c, payload, "OK")
 }
@@ -43,11 +47,13 @@ func (v *VehicleController) listHandler(c *gin.Context) {
 	requestQueryParams, err := common.ValidateRequestQueryParams(c)
 	if err != nil {
 		v.NewErrorErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
 	}
 
 	vehicles, paging, err := v.usecase.Paging(requestQueryParams)
 	if err != nil {
 		v.NewErrorErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
 	}
 
 	var vehicleInterface []interface{}
@@ -72,6 +78,7 @@ func (v *VehicleController) deleteHandler(c *gin.Context) {
 	err := v.usecase.DeleteData(id)
 	if err != nil {
 		v.NewErrorErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
 	}
 	c.String(http.StatusNoContent, "")
 }
