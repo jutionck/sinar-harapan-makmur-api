@@ -4,11 +4,13 @@ import (
 	"fmt"
 
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/model"
+	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/model/dto"
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/repository"
 )
 
 type VehicleUseCase interface {
 	BaseUseCase[model.Vehicle]
+	Paging(requestQueryParams dto.RequestQueryParams) ([]model.Vehicle, dto.Paging, error)
 	UpdateVehicleStock(count int, id string) error
 }
 
@@ -26,7 +28,12 @@ func (v *vehicleUseCase) FindAll() ([]model.Vehicle, error) {
 }
 
 func (v *vehicleUseCase) FindById(id string) (*model.Vehicle, error) {
-	return v.repo.Get(id)
+	vehicle, err := v.repo.Get(id)
+	if err != nil {
+		return nil, fmt.Errorf("vehicle with id %s not found", id)
+	}
+
+	return vehicle, nil
 }
 
 func (v *vehicleUseCase) SaveData(payload *model.Vehicle) error {
@@ -44,6 +51,14 @@ func (v *vehicleUseCase) DeleteData(id string) error {
 
 func (v *vehicleUseCase) UpdateVehicleStock(count int, id string) error {
 	return v.repo.UpdateStock(count, id)
+}
+
+func (v *vehicleUseCase) Paging(requestQueryParams dto.RequestQueryParams) ([]model.Vehicle, dto.Paging, error) {
+	if !requestQueryParams.QueryParams.IsSortValid() {
+		return nil, dto.Paging{}, fmt.Errorf("invalid sort by: %s", requestQueryParams.QueryParams.Sort)
+	}
+	return v.repo.Paging(requestQueryParams)
+
 }
 
 func NewVehicleUseCase(repo repository.VehicleRepository, brandUseCase BrandUseCase) VehicleUseCase {

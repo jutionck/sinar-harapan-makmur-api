@@ -11,7 +11,6 @@ type BrandUseCase interface {
 	BaseUseCase[model.Brand]
 	FindAllBrandWithVehicle() ([]model.Brand, error)
 	FindByBrandWithVehicle(brandId string) (*model.Brand, error)
-	IsNameExists(name string, id string) (bool, error)
 }
 
 type brandUseCase struct {
@@ -39,20 +38,10 @@ func (b *brandUseCase) FindById(id string) (*model.Brand, error) {
 }
 
 func (b *brandUseCase) SaveData(payload *model.Brand) error {
-	err := payload.Validate()
-	if err != nil {
-		return err
-	}
-
-	_, err = b.IsNameExists(payload.Name, payload.ID)
-	if err != nil {
-		return err
-	}
-
 	if payload.ID != "" {
 		_, err := b.FindById(payload.ID)
 		if err != nil {
-			return fmt.Errorf("brand with ID %s not found", payload.ID)
+			return fmt.Errorf("Brand with ID %s not found!", payload.ID)
 		}
 	}
 	return b.repo.Save(payload)
@@ -61,7 +50,7 @@ func (b *brandUseCase) SaveData(payload *model.Brand) error {
 func (b *brandUseCase) SearchBy(by map[string]interface{}) ([]model.Brand, error) {
 	brands, err := b.repo.Search(by)
 	if err != nil {
-		return nil, fmt.Errorf("data not found")
+		return nil, fmt.Errorf("Data not found")
 	}
 	return brands, nil
 }
@@ -73,17 +62,9 @@ func (b *brandUseCase) FindAllBrandWithVehicle() ([]model.Brand, error) {
 func (b *brandUseCase) FindByBrandWithVehicle(brandId string) (*model.Brand, error) {
 	brand, err := b.FindById(brandId)
 	if err != nil {
-		return nil, fmt.Errorf("brand with ID %s not found", brandId)
+		return nil, fmt.Errorf("Brand with ID %s not found!", brandId)
 	}
 	return b.repo.GetBrandWithVehicle(brand.ID)
-}
-
-func (b *brandUseCase) IsNameExists(name string, id string) (bool, error) {
-	count, _ := b.repo.CountByName(name, id)
-	if count > 0 {
-		return true, fmt.Errorf("brand with name %s already exists", name)
-	}
-	return false, nil
 }
 
 func NewBrandUseCase(repo repository.BrandRepository) BrandUseCase {
