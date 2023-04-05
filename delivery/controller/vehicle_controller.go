@@ -1,7 +1,10 @@
 package controller
 
 import (
+	"encoding/json"
+	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/delivery/api"
@@ -16,17 +19,28 @@ type VehicleController struct {
 	api.BaseApi
 }
 
+// https://github.com/gin-gonic/gin#multiparturlencoded-form
+// https://github.com/gin-gonic/gin#upload-files
 func (v *VehicleController) createHandler(c *gin.Context) {
-	var payload model.Vehicle
-	if err := c.ShouldBindJSON(&payload); err != nil {
-		v.NewErrorErrorResponse(c, http.StatusBadRequest, err.Error())
-		return
+	vehicle := c.PostForm("vehicle")
+	file, fileHeader, err := c.Request.FormFile("photo")
+	if err != nil {
+		v.NewErrorErrorResponse(c, http.StatusBadRequest, "Failed Get File")
 	}
-	if err := v.usecase.SaveData(&payload); err != nil {
+	log.Println(fileHeader.Filename)
+	fileName := strings.Split(fileHeader.Filename, ".")
+	if len(fileName) != 2 {
+		v.NewErrorErrorResponse(c, http.StatusBadRequest, "Unrecognized file extension")
+	}
+	var payload model.Vehicle
+	err = json.Unmarshal([]byte(vehicle), &payload)
+	if err != nil {
+		log.Println("failed to unmarshal")
+	}
+	if err := v.usecase.UploadImage(&payload, file, fileName[1]); err != nil {
 		v.NewErrorErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-
 	v.NewSuccessSingleResponse(c, payload, "OK")
 }
 
@@ -73,6 +87,16 @@ func (v *VehicleController) getByIDHandler(c *gin.Context) {
 	v.NewSuccessSingleResponse(c, vehicle, "OK")
 }
 
+func (v *VehicleController) getImageByIDHandler(c *gin.Context) {
+	id := c.Param("id")
+	vehicle, err := v.usecase.FindById(id)
+	if err != nil {
+		v.NewErrorErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	v.NewSuccessFileResponse(c, vehicle.ImgPath, "OK")
+}
+
 func (v *VehicleController) deleteHandler(c *gin.Context) {
 	id := c.Param("id")
 	err := v.usecase.DeleteData(id)
@@ -90,6 +114,7 @@ func NewVehicleController(r *gin.Engine, usecase usecase.VehicleUseCase) *Vehicl
 	}
 	r.GET("/vehicles", controller.listHandler)
 	r.GET("/vehicles/:id", controller.getByIDHandler)
+	r.GET("/vehicles/image/:id", controller.getImageByIDHandler)
 	r.POST("/vehicles", controller.createHandler)
 	r.PUT("/vehicles", controller.updateHandler)
 	r.DELETE("/vehicles/:id", controller.deleteHandler)

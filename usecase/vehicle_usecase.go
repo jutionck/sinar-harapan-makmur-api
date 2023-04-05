@@ -2,6 +2,8 @@ package usecase
 
 import (
 	"fmt"
+	"mime/multipart"
+	"strings"
 
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/model"
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/model/dto"
@@ -12,11 +14,13 @@ type VehicleUseCase interface {
 	BaseUseCase[model.Vehicle]
 	Paging(requestQueryParams dto.RequestQueryParams) ([]model.Vehicle, dto.Paging, error)
 	UpdateVehicleStock(count int, id string) error
+	UploadImage(payload *model.Vehicle, file multipart.File, fileExt string) error
 }
 
 type vehicleUseCase struct {
 	repo         repository.VehicleRepository
 	brandUseCase BrandUseCase
+	fileUseCase  FileUseCase
 }
 
 func (v *vehicleUseCase) SearchBy(by map[string]interface{}) ([]model.Vehicle, error) {
@@ -61,6 +65,31 @@ func (v *vehicleUseCase) Paging(requestQueryParams dto.RequestQueryParams) ([]mo
 
 }
 
-func NewVehicleUseCase(repo repository.VehicleRepository, brandUseCase BrandUseCase) VehicleUseCase {
-	return &vehicleUseCase{repo: repo, brandUseCase: brandUseCase}
+func (v *vehicleUseCase) UploadImage(payload *model.Vehicle, file multipart.File, fileExt string) error {
+	concatName := fmt.Sprintf("%s-%s", payload.Model, payload.BrandID)
+	fileName := fmt.Sprintf("img-%s.%s", strings.ToLower(concatName), fileExt)
+	fileLocation, err := v.fileUseCase.Save(file, fileName)
+	if err != nil {
+		return err
+	}
+
+	payload.ImgPath = fileLocation
+	payload.UrlPath = fmt.Sprintf("/vehicles/image/%s", strings.ToLower(concatName))
+	err = v.SaveData(payload)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func NewVehicleUseCase(
+	repo repository.VehicleRepository,
+	brandUseCase BrandUseCase,
+	fileUseCase FileUseCase,
+) VehicleUseCase {
+	return &vehicleUseCase{
+		repo:         repo,
+		brandUseCase: brandUseCase,
+		fileUseCase:  fileUseCase,
+	}
 }

@@ -16,6 +16,8 @@ type Vehicle struct {
 	SalePrice      int        `gorm:"check:sale_price > 0" json:"salePrice"`
 	Status         string     `gorm:"check:status IN ('baru', 'bekas')" json:"status"`
 	Customers      []Customer `gorm:"many2many:customer_vehicles;" json:"customers,omitempty"`
+	ImgPath        string     `json:"imgPath,omitempty"`
+	UrlPath        string     `json:"urlPath"`
 	BaseModel
 }
 

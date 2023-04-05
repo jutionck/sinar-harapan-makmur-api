@@ -8,6 +8,7 @@ type UseCaseManager interface {
 	CustomerUseCase() usecase.CustomerUseCase
 	EmployeeUseCase() usecase.EmployeeUseCase
 	TransactionUseCase() usecase.TransactionUseCase
+	FileUseCase() usecase.FileUseCase
 }
 
 type useCaseManager struct {
@@ -16,6 +17,10 @@ type useCaseManager struct {
 
 func (u *useCaseManager) CustomerUseCase() usecase.CustomerUseCase {
 	return usecase.NewCustomerUseCase(u.repoManager.CustomerRepo())
+}
+
+func (u *useCaseManager) FileUseCase() usecase.FileUseCase {
+	return usecase.NewFileUseCase(u.repoManager.FileRepo())
 }
 
 func (u *useCaseManager) EmployeeUseCase() usecase.EmployeeUseCase {
@@ -31,7 +36,7 @@ func (u *useCaseManager) BrandUseCase() usecase.BrandUseCase {
 }
 
 func (u *useCaseManager) VehicleUseCase() usecase.VehicleUseCase {
-	return usecase.NewVehicleUseCase(u.repoManager.VehicleRepo(), u.BrandUseCase())
+	return usecase.NewVehicleUseCase(u.repoManager.VehicleRepo(), u.BrandUseCase(), u.FileUseCase())
 }
 
 func NewUseCaseManager(repoManager RepositoryManager) UseCaseManager {

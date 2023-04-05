@@ -2,6 +2,7 @@ package manager
 
 import (
 	"fmt"
+
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/config"
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/model"
 	"github.com/sirupsen/logrus"
@@ -14,12 +15,22 @@ type InfraManager interface {
 	Migrate(model ...any) error
 	Log() *logrus.Logger
 	LogFilePath() string
+	UploadLocation() string
+	MediaLocation() string
 }
 
 type infraManager struct {
 	db  *gorm.DB
 	cfg *config.Config
 	log *logrus.Logger
+}
+
+func (i *infraManager) UploadLocation() string {
+	return i.cfg.UploadLocation
+}
+
+func (i *infraManager) MediaLocation() string {
+	return i.cfg.MediaLocation
 }
 
 func (i *infraManager) LogFilePath() string {
@@ -57,7 +68,7 @@ func (i *infraManager) initDb() error {
 	}
 	i.db = conn
 	if i.cfg.FileConfig.Env == "MIGRATION" {
-		conn.Debug()
+		i.db = conn.Debug()
 		err := i.Migrate(
 			&model.Brand{},
 			&model.Vehicle{},
@@ -70,7 +81,7 @@ func (i *infraManager) initDb() error {
 			return err
 		}
 	} else if i.cfg.FileConfig.Env == "DEV" {
-		conn.Debug()
+		i.db = conn.Debug()
 	} else {
 		// production / release
 	}
