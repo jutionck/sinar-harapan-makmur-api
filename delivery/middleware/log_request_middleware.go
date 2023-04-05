@@ -1,27 +1,24 @@
 package middleware
 
 import (
-	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/model"
-	"github.com/sirupsen/logrus"
-	"log"
 	"os"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/config"
+	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/model"
+	"github.com/sirupsen/logrus"
 )
 
-func LogRequestMiddleware() gin.HandlerFunc {
-	// Open file
-	filePath := "/Users/jutioncandrakirana/Documents/GitHub/enigma/GOLANG/golang-sinar-harapan-makmur-api"
-	fileName := filePath + "/LOG_REQUEST.txt"
-	file, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+func LogRequestMiddleware(log *logrus.Logger) gin.HandlerFunc {
+	cfg, err := config.NewConfig()
+	file, err := os.OpenFile(cfg.LogFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Set up logrus
-	logger := logrus.New()
-	logger.SetOutput(file)
+	log.SetOutput(file)
 
 	return func(c *gin.Context) {
 		startTime := time.Now()
@@ -29,7 +26,6 @@ func LogRequestMiddleware() gin.HandlerFunc {
 		c.Next()
 
 		endTime := time.Since(startTime)
-
 		entryLog := model.RequestLog{
 			EndTime:      endTime,
 			StatusCode:   c.Writer.Status(),
@@ -39,7 +35,13 @@ func LogRequestMiddleware() gin.HandlerFunc {
 			UserAgent:    c.Request.UserAgent(),
 		}
 
-		entryLogString := fmt.Sprintf("[LOG] : %v\n", entryLog)
-		logger.Println(entryLogString)
+		switch {
+		case c.Writer.Status() >= 500:
+			log.Error(entryLog)
+		case c.Writer.Status() >= 400:
+			log.Warn(entryLog)
+		default:
+			log.Info(entryLog)
+		}
 	}
 }

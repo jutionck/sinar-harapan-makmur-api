@@ -20,8 +20,8 @@ type DbConfig struct {
 }
 
 type FileConfig struct {
-	FilePath string
-	Env      string
+	LogFilePath string
+	Env         string
 }
 
 type Config struct {
@@ -50,7 +50,8 @@ func (c *Config) ReadConfigFile() error {
 	}
 
 	c.FileConfig = FileConfig{
-		Env: os.Getenv("ENV"),
+		Env:         os.Getenv("ENV"),
+		LogFilePath: os.Getenv("REQUEST_FILE_PATH"),
 	}
 
 	if c.DbConfig.Host == "" || c.DbConfig.Port == "" || c.DbConfig.Name == "" ||

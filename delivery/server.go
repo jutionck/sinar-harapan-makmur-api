@@ -2,12 +2,14 @@ package delivery
 
 import (
 	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/config"
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/delivery/controller"
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/delivery/middleware"
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/repository"
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/usecase"
+	"github.com/sirupsen/logrus"
 )
 
 type Server struct {
@@ -18,6 +20,7 @@ type Server struct {
 	transactionUC usecase.TransactionUseCase
 	engine        *gin.Engine
 	host          string
+	log           *logrus.Logger
 }
 
 func (s *Server) Run() {
@@ -29,6 +32,7 @@ func (s *Server) Run() {
 }
 
 func (s *Server) initController() {
+	s.engine.Use(middleware.LogRequestMiddleware(s.log))
 	controller.NewVehicleController(s.engine, s.vehicleUC)
 	controller.NewBrandController(s.engine, s.brandUC)
 	controller.NewCustomerController(s.engine, s.customerUC)
@@ -46,8 +50,7 @@ func NewServer() *Server {
 	db := dbConn.Conn()
 
 	r := gin.Default()
-	r.Use(middleware.LogRequestMiddleware())
-	r.Use(middleware.LogResponseMiddleware())
+	logger := logrus.New()
 	vehicleRepo := repository.NewVehicleRepository(db)
 	brandRepo := repository.NewBrandRepository(db)
 	customerRepo := repository.NewCustomerRepository(db)
@@ -66,5 +69,7 @@ func NewServer() *Server {
 		employeeUC:    employeeUC,
 		transactionUC: transactionUC,
 		engine:        r,
-		host:          host}
+		host:          host,
+		log:           logger,
+	}
 }
