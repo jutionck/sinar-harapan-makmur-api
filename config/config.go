@@ -23,7 +23,6 @@ type FileConfig struct {
 	LogFilePath    string
 	Env            string
 	UploadLocation string
-	MediaLocation  string
 }
 
 type Config struct {
@@ -55,7 +54,6 @@ func (c *Config) ReadConfigFile() error {
 		Env:            os.Getenv("ENV"),
 		LogFilePath:    os.Getenv("REQUEST_FILE_PATH"),
 		UploadLocation: os.Getenv("UPLOAD_LOCATION"),
-		MediaLocation:  os.Getenv("MEDIA_LOCATION"),
 	}
 
 	if c.DbConfig.Host == "" || c.DbConfig.Port == "" || c.DbConfig.Name == "" ||

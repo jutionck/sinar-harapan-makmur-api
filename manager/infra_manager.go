@@ -16,7 +16,6 @@ type InfraManager interface {
 	Log() *logrus.Logger
 	LogFilePath() string
 	UploadLocation() string
-	MediaLocation() string
 }
 
 type infraManager struct {
@@ -27,10 +26,6 @@ type infraManager struct {
 
 func (i *infraManager) UploadLocation() string {
 	return i.cfg.UploadLocation
-}
-
-func (i *infraManager) MediaLocation() string {
-	return i.cfg.MediaLocation
 }
 
 func (i *infraManager) LogFilePath() string {
