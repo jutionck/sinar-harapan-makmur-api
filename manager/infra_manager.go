@@ -16,43 +16,49 @@ type InfraManager interface {
 	LogFilePath() string
 }
 
-type dbConnection struct {
+type infraManager struct {
 	db  *gorm.DB
 	cfg *config.Config
 	log *logrus.Logger
 }
 
-func (d *dbConnection) LogFilePath() string {
-	return d.cfg.LogFilePath
+func (i *infraManager) LogFilePath() string {
+	return i.cfg.LogFilePath
 }
 
-func (d *dbConnection) Log() *logrus.Logger {
+func (i *infraManager) Log() *logrus.Logger {
 	logger := logrus.New()
 	return logger
 }
 
-func (d *dbConnection) Conn() *gorm.DB {
-	return d.db
+func (i *infraManager) Conn() *gorm.DB {
+	return i.db
 }
 
-func (d *dbConnection) Migrate(model ...any) error {
-	err := d.Conn().AutoMigrate(model...)
+func (i *infraManager) Migrate(model ...any) error {
+	err := i.Conn().AutoMigrate(model...)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (d *dbConnection) initDb() error {
-	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", d.cfg.Host, d.cfg.Port, d.cfg.User, d.cfg.Password, d.cfg.Name)
+func (i *infraManager) initDb() error {
+	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		i.cfg.Host,
+		i.cfg.Port,
+		i.cfg.User,
+		i.cfg.Password,
+		i.cfg.Name,
+	)
 	conn, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}
-	d.db = conn
-	if d.cfg.FileConfig.Env == "MIGRATION" {
+	i.db = conn
+	if i.cfg.FileConfig.Env == "MIGRATION" {
 		conn.Debug()
-		err := d.Migrate(
+		err := i.Migrate(
 			&model.Brand{},
 			&model.Vehicle{},
 			&model.UserCredential{},
@@ -63,7 +69,7 @@ func (d *dbConnection) initDb() error {
 		if err != nil {
 			return err
 		}
-	} else if d.cfg.FileConfig.Env == "DEV" {
+	} else if i.cfg.FileConfig.Env == "DEV" {
 		conn.Debug()
 	} else {
 		// production / release
@@ -72,7 +78,7 @@ func (d *dbConnection) initDb() error {
 }
 
 func NewInfraManager(cfg *config.Config) (InfraManager, error) {
-	conn := &dbConnection{cfg: cfg}
+	conn := &infraManager{cfg: cfg}
 	err := conn.initDb()
 	if err != nil {
 		return nil, err

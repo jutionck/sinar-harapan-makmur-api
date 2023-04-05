@@ -17,6 +17,15 @@ type Server struct {
 	log       *logrus.Logger
 }
 
+func (s *Server) initController() {
+	s.engine.Use(middleware.LogRequestMiddleware(s.log))
+	controller.NewVehicleController(s.engine, s.ucManager.VehicleUseCase())
+	controller.NewBrandController(s.engine, s.ucManager.BrandUseCase())
+	controller.NewCustomerController(s.engine, s.ucManager.CustomerUseCase())
+	controller.NewEmployeeController(s.engine, s.ucManager.EmployeeUseCase())
+	controller.NewTransactionController(s.engine, s.ucManager.TransactionUseCase())
+}
+
 func NewServer() *Server {
 	c, err := config.NewConfig()
 	if err != nil {
@@ -44,13 +53,4 @@ func (s *Server) Run() {
 	if err != nil {
 		panic(err)
 	}
-}
-
-func (s *Server) initController() {
-	s.engine.Use(middleware.LogRequestMiddleware(s.log))
-	controller.NewVehicleController(s.engine, s.ucManager.VehicleUseCase())
-	controller.NewBrandController(s.engine, s.ucManager.BrandUseCase())
-	controller.NewCustomerController(s.engine, s.ucManager.CustomerUseCase())
-	controller.NewEmployeeController(s.engine, s.ucManager.EmployeeUseCase())
-	controller.NewTransactionController(s.engine, s.ucManager.TransactionUseCase())
 }
