@@ -2,14 +2,16 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/delivery/middleware"
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/model"
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/usecase"
 	"net/http"
 )
 
 type BrandController struct {
-	router  *gin.Engine
-	usecase usecase.BrandUseCase
+	router         *gin.Engine
+	usecase        usecase.BrandUseCase
+	authMiddleware middleware.AuthTokenMiddleware
 }
 
 func (b *BrandController) createHandler(c *gin.Context) {
@@ -68,15 +70,16 @@ func (b *BrandController) deleteHandler(c *gin.Context) {
 	c.String(http.StatusNoContent, "")
 }
 
-func NewBrandController(r *gin.Engine, usecase usecase.BrandUseCase) *BrandController {
+func NewBrandController(r *gin.Engine, usecase usecase.BrandUseCase, authMiddleware middleware.AuthTokenMiddleware) *BrandController {
 	controller := BrandController{
-		router:  r,
-		usecase: usecase,
+		router:         r,
+		usecase:        usecase,
+		authMiddleware: authMiddleware,
 	}
-	r.GET("/brands", controller.listHandler)
-	r.GET("/brands/:id", controller.getByIDHandler)
-	r.POST("/brands", controller.createHandler)
-	r.PUT("/brands", controller.updateHandler)
-	r.DELETE("/brands/:id", controller.deleteHandler)
+	r.GET("/brands", authMiddleware.RequireToken(), controller.listHandler)
+	r.GET("/brands/:id", authMiddleware.RequireToken(), controller.getByIDHandler)
+	r.POST("/brands", authMiddleware.RequireToken(), controller.createHandler)
+	r.PUT("/brands", authMiddleware.RequireToken(), controller.updateHandler)
+	r.DELETE("/brands/:id", authMiddleware.RequireToken(), controller.deleteHandler)
 	return &controller
 }

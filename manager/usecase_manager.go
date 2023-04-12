@@ -1,6 +1,8 @@
 package manager
 
-import "github.com/jutionck/golang-db-sinar-harapan-makmur-orm/usecase"
+import (
+	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/usecase"
+)
 
 type UseCaseManager interface {
 	BrandUseCase() usecase.BrandUseCase

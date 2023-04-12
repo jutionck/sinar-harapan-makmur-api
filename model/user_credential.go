@@ -2,8 +2,8 @@ package model
 
 type UserCredential struct {
 	BaseModel
-	UserName string `gorm:"unique;size:50;not null"`
-	Password string `gorm:"not null"`
+	UserName string `gorm:"unique;size:50;not null" json:"username"`
+	Password string `gorm:"not null" json:"password"`
 	IsActive bool   `gorm:"default:false"`
 }
 

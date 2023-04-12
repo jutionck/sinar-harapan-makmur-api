@@ -7,23 +7,29 @@ import (
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/delivery/controller"
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/delivery/middleware"
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/manager"
+	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/usecase"
+	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/utils/security"
 	"github.com/sirupsen/logrus"
 )
 
 type Server struct {
-	ucManager manager.UseCaseManager
-	engine    *gin.Engine
-	host      string
-	log       *logrus.Logger
+	ucManager    manager.UseCaseManager
+	authUseCase  usecase.AuthenticationUseCase
+	tokenService security.AccessToken
+	engine       *gin.Engine
+	host         string
+	log          *logrus.Logger
 }
 
 func (s *Server) initController() {
 	s.engine.Use(middleware.LogRequestMiddleware(s.log))
+	authMiddleware := middleware.NewTokenValidator(s.tokenService)
 	controller.NewVehicleController(s.engine, s.ucManager.VehicleUseCase())
-	controller.NewBrandController(s.engine, s.ucManager.BrandUseCase())
+	controller.NewBrandController(s.engine, s.ucManager.BrandUseCase(), authMiddleware)
 	controller.NewCustomerController(s.engine, s.ucManager.CustomerUseCase())
 	controller.NewEmployeeController(s.engine, s.ucManager.EmployeeUseCase())
 	controller.NewTransactionController(s.engine, s.ucManager.TransactionUseCase())
+	controller.NewAuthController(s.engine, s.authUseCase)
 }
 
 func NewServer() *Server {
@@ -37,13 +43,19 @@ func NewServer() *Server {
 	repoManager := manager.NewRepositoryManager(infraManager)
 	// use case manager
 	useCaseManager := manager.NewUseCaseManager(repoManager)
+	// token
+	tokenService := security.NewAccessToken(c.TokenConfig)
+	authUseCase := usecase.NewAuthenticationUseCase(repoManager.UserRepo(), tokenService)
+
 	r := gin.Default()
 	host := fmt.Sprintf("%s:%s", c.ApiHost, c.ApiPort)
 	return &Server{
-		ucManager: useCaseManager,
-		engine:    r,
-		host:      host,
-		log:       infraManager.Log(),
+		ucManager:    useCaseManager,
+		authUseCase:  authUseCase,
+		tokenService: tokenService,
+		engine:       r,
+		host:         host,
+		log:          infraManager.Log(),
 	}
 }
 
