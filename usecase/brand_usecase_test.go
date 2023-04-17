@@ -53,7 +53,8 @@ func (r *repoMock) List() ([]model.Brand, error) {
 }
 
 func (r *repoMock) Save(payload *model.Brand) error {
-	return nil
+	ret := r.Called(payload)
+	return ret.Error(0)
 }
 
 func (r *repoMock) Search(by map[string]interface{}) ([]model.Brand, error) {
@@ -221,11 +222,26 @@ func (suite *BrandUseCaseTestSuite) TestSaveData_RepoErrorFail() {
 	dummy := brandDummies[0]
 	var countBrand int64 = 1
 	suite.repoMock.On("CountByName", "Honda", "1").Return(countBrand, errors.New("repo error"))
-	suite.repoMock.On("Get", "1").Return(nil, errors.New("repo error"))
 	suite.repoMock.On("Save", &dummy).Return(errors.New("repo error"))
-	usecase := NewBrandUseCase(suite.repoMock)
-	err := usecase.SaveData(&dummy)
+	useCase := NewBrandUseCase(suite.repoMock)
+	err := dummy.Validate()
+	dummy.Name = ""
+	err = useCase.SaveData(&dummy)
 	assert.Error(suite.T(), err)
+	dummy = brandDummies[0]
+	err = useCase.SaveData(&dummy)
+	assert.Error(suite.T(), err)
+}
+
+func (suite *BrandUseCaseTestSuite) TestSaveData_IDNotFoundFail() {
+	dummy := brandDummies[0]
+	var countBrand int64 = 0
+	suite.repoMock.On("CountByName", "Honda", "1").Return(countBrand, nil)
+	suite.repoMock.On("Get", "1").Return(nil, errors.New("not found"))
+	useCase := NewBrandUseCase(suite.repoMock)
+	err := useCase.SaveData(&dummy)
+	assert.Error(suite.T(), err)
+	assert.Equal(suite.T(), "brand with ID 1 not found", err.Error())
 }
 
 // BrandUseCaseTestSuite as test suite model, any field suite and repoMock

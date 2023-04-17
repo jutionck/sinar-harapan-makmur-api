@@ -50,6 +50,7 @@ func (b *brandUseCase) SaveData(payload *model.Brand) error {
 	}
 
 	if payload.ID != "" {
+		fmt.Println("here")
 		_, err := b.FindById(payload.ID)
 		if err != nil {
 			return fmt.Errorf("brand with ID %s not found", payload.ID)
