@@ -29,10 +29,11 @@ type FileConfig struct {
 }
 
 type TokenConfig struct {
-	ApplicationName     string
-	JwtSignatureKey     string
-	JwtSigningMethod    *jwt.SigningMethodHMAC
-	AccessTokenLifeTime time.Duration
+	ApplicationName      string
+	JwtSignatureKey      string
+	JwtSigningMethod     *jwt.SigningMethodHMAC
+	AccessTokenLifeTime  time.Duration
+	RefreshTokenLifeTime time.Duration
 }
 
 type Config struct {
@@ -73,10 +74,11 @@ func (c *Config) ReadConfigFile() error {
 		return errors.New("failed to convert token expire")
 	}
 	c.TokenConfig = TokenConfig{
-		ApplicationName:     os.Getenv("TOKEN_APP_NAME"),
-		JwtSignatureKey:     os.Getenv("TOKEN_SECRET"),
-		JwtSigningMethod:    jwt.SigningMethodHS256,
-		AccessTokenLifeTime: accessTokenLifeTime,
+		ApplicationName:      os.Getenv("TOKEN_APP_NAME"),
+		JwtSignatureKey:      os.Getenv("TOKEN_SECRET"),
+		JwtSigningMethod:     jwt.SigningMethodHS256,
+		AccessTokenLifeTime:  accessTokenLifeTime,
+		RefreshTokenLifeTime: accessTokenLifeTime,
 	}
 
 	if c.DbConfig.Host == "" || c.DbConfig.Port == "" || c.DbConfig.Name == "" ||
