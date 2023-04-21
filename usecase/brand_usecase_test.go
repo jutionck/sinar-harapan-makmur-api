@@ -3,6 +3,7 @@ package usecase
 import (
 	"errors"
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/model"
+	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/model/dto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -65,28 +66,17 @@ func (r *repoMock) Search(by map[string]interface{}) ([]model.Brand, error) {
 	return args.Get(0).([]model.Brand), nil
 }
 
-func (r *repoMock) GetBrandWithVehicle(brandId string) (*model.Brand, error) {
-	args := r.Called(brandId)
-	if args.Get(1) != nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*model.Brand), nil
-}
-
-func (r *repoMock) ListBrandWithVehicle() ([]model.Brand, error) {
-	args := r.Called()
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).([]model.Brand), nil
-}
-
 func (r *repoMock) CountByName(name string, id string) (int64, error) {
 	args := r.Called(name, id)
 	if args.Get(0) == nil {
 		return 0, args.Error(1)
 	}
 	return args.Get(0).(int64), nil
+}
+
+func (b *repoMock) Paging(requestQueryParams dto.RequestQueryParams) ([]model.Brand, dto.Paging, error) {
+	args := b.Called(requestQueryParams)
+	return args.Get(0).([]model.Brand), args.Get(1).(dto.Paging), args.Error(2)
 }
 
 func (suite *BrandUseCaseTestSuite) TestIsNameExists_Success() {
@@ -155,40 +145,6 @@ func (suite *BrandUseCaseTestSuite) TestFindById_RepoErrorFail() {
 	assert.Error(suite.T(), err)
 }
 
-func (suite *BrandUseCaseTestSuite) TestFindAllBrandWithVehicle_Success() {
-	suite.repoMock.On("ListBrandWithVehicle").Return(brandDummies, nil)
-	useCase := NewBrandUseCase(suite.repoMock)
-	brands, err := useCase.FindAllBrandWithVehicle()
-	assert.Equal(suite.T(), brandDummies, brands)
-	assert.Nil(suite.T(), err)
-}
-
-func (suite *BrandUseCaseTestSuite) TestFindAllBrandWithVehicle_RepoErrorFail() {
-	suite.repoMock.On("ListBrandWithVehicle").Return(nil, errors.New("repo error"))
-	useCase := NewBrandUseCase(suite.repoMock)
-	list, err := useCase.FindAllBrandWithVehicle()
-	assert.Nil(suite.T(), list)
-	assert.Error(suite.T(), err)
-}
-
-func (suite *BrandUseCaseTestSuite) TestFindByBrandWithVehicle_Success() {
-	suite.repoMock.On("Get", "1").Return(&brandDummies[0], nil)
-	suite.repoMock.On("GetBrandWithVehicle", "1").Return(&brandDummies[0], nil)
-	useCase := NewBrandUseCase(suite.repoMock)
-	brand, err := useCase.FindByBrandWithVehicle("1")
-	assert.Equal(suite.T(), brandDummies[0], *brand)
-	assert.Nil(suite.T(), err)
-}
-
-func (suite *BrandUseCaseTestSuite) TestFindByBrandWithVehicle_RepoErrorFail() {
-	suite.repoMock.On("Get", "1").Return(nil, errors.New("repo error"))
-	suite.repoMock.On("GetBrandWithVehicle", "1").Return(nil, errors.New("repo error"))
-	useCase := NewBrandUseCase(suite.repoMock)
-	brand, err := useCase.FindByBrandWithVehicle("1")
-	assert.Nil(suite.T(), brand)
-	assert.Error(suite.T(), err)
-}
-
 func (suite *BrandUseCaseTestSuite) TestSearchBy_Success() {
 	filter := map[string]interface{}{"brand": "Honda"}
 	suite.repoMock.On("Search", filter).Return(brandDummies, nil)
@@ -242,6 +198,39 @@ func (suite *BrandUseCaseTestSuite) TestSaveData_IDNotFoundFail() {
 	err := useCase.SaveData(&dummy)
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), "brand with ID 1 not found", err.Error())
+}
+
+func (suite *BrandUseCaseTestSuite) TestPagination_Success() {
+	brandDm := brandDummies
+	expectedPaging := dto.Paging{
+		Page:        1,
+		RowsPerPage: 5,
+		TotalRows:   5,
+		TotalPages:  1,
+	}
+	suite.repoMock.On("Paging", mock.AnythingOfType("dto.RequestQueryParams")).Return(brandDm, expectedPaging, nil)
+	useCase := NewBrandUseCase(suite.repoMock)
+	requestParams := dto.RequestQueryParams{QueryParams: dto.QueryParams{Sort: "ASC"}}
+	actualBrand, actualPaging, actualError := useCase.Pagination(requestParams)
+	assert.Equal(suite.T(), brandDm, actualBrand)
+	assert.Equal(suite.T(), expectedPaging, actualPaging)
+	assert.Equal(suite.T(), nil, actualError)
+}
+
+func (suite *BrandUseCaseTestSuite) TestPagination_Fail() {
+	expectedPaging := dto.Paging{
+		Page:        0,
+		RowsPerPage: 0,
+		TotalRows:   0,
+		TotalPages:  0,
+	}
+	suite.repoMock.On("Paging", mock.AnythingOfType("dto.RequestQueryParams")).Return(nil, expectedPaging, errors.New("repo error"))
+	useCase := NewBrandUseCase(suite.repoMock)
+	requestParams := dto.RequestQueryParams{QueryParams: dto.QueryParams{Sort: "ABC"}}
+	_, actualPaging, actualError := useCase.Pagination(requestParams)
+	assert.Equal(suite.T(), expectedPaging, actualPaging)
+	assert.Error(suite.T(), actualError)
+	assert.Equal(suite.T(), "invalid sort by: ABC", actualError.Error())
 }
 
 // BrandUseCaseTestSuite as test suite model, any field suite and repoMock

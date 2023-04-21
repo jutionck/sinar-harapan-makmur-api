@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"fmt"
+	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/model/dto"
 
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/model"
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/repository"
@@ -9,8 +10,7 @@ import (
 
 type BrandUseCase interface {
 	BaseUseCase[model.Brand]
-	FindAllBrandWithVehicle() ([]model.Brand, error)
-	FindByBrandWithVehicle(brandId string) (*model.Brand, error)
+	BaseUseCasePaging[model.Brand]
 	IsNameExists(name string, id string) (bool, error)
 }
 
@@ -67,24 +67,19 @@ func (b *brandUseCase) SearchBy(by map[string]interface{}) ([]model.Brand, error
 	return brands, nil
 }
 
-func (b *brandUseCase) FindAllBrandWithVehicle() ([]model.Brand, error) {
-	return b.repo.ListBrandWithVehicle()
-}
-
-func (b *brandUseCase) FindByBrandWithVehicle(brandId string) (*model.Brand, error) {
-	brand, err := b.FindById(brandId)
-	if err != nil {
-		return nil, fmt.Errorf("brand with ID %s not found", brandId)
-	}
-	return b.repo.GetBrandWithVehicle(brand.ID)
-}
-
 func (b *brandUseCase) IsNameExists(name string, id string) (bool, error) {
 	count, _ := b.repo.CountByName(name, id)
 	if count > 0 {
 		return true, fmt.Errorf("brand with name %s already exists", name)
 	}
 	return false, nil
+}
+
+func (b *brandUseCase) Pagination(requestQueryParams dto.RequestQueryParams) ([]model.Brand, dto.Paging, error) {
+	if !requestQueryParams.QueryParams.IsSortValid() {
+		return nil, dto.Paging{}, fmt.Errorf("invalid sort by: %s", requestQueryParams.QueryParams.Sort)
+	}
+	return b.repo.Paging(requestQueryParams)
 }
 
 func NewBrandUseCase(repo repository.BrandRepository) BrandUseCase {
