@@ -53,24 +53,6 @@ func (b *brandRepository) Search(by map[string]interface{}) ([]model.Brand, erro
 	return brands, nil
 }
 
-func (b *brandRepository) GetBrandWithVehicle(brandId string) (*model.Brand, error) {
-	var brand model.Brand
-	result := b.db.Preload("Brand").First(&brand, "id=?", brandId).Error
-	if result != nil {
-		return nil, result
-	}
-	return &brand, nil
-}
-
-func (b *brandRepository) ListBrandWithVehicle() ([]model.Brand, error) {
-	var brands []model.Brand
-	result := b.db.Preload("Brand").Find(&brands).Error
-	if result != nil {
-		return nil, result
-	}
-	return brands, nil
-}
-
 func (b *brandRepository) CountByName(name string, id string) (int64, error) {
 	var count int64
 	var result *gorm.DB
