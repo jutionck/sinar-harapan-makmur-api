@@ -25,7 +25,10 @@ func (a *AuthController) loginHandler(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 		return
 	}
-	c.JSON(http.StatusCreated, token)
+	c.JSON(http.StatusCreated, gin.H{
+		"code":  http.StatusCreated,
+		"token": token,
+	})
 }
 
 func NewAuthController(r *gin.Engine, usecase usecase.AuthenticationUseCase) *AuthController {

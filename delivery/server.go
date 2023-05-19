@@ -24,11 +24,11 @@ type Server struct {
 func (s *Server) initController() {
 	s.engine.Use(middleware.LogRequestMiddleware(s.log))
 	authMiddleware := middleware.NewTokenValidator(s.tokenService)
-	controller.NewVehicleController(s.engine, s.ucManager.VehicleUseCase())
+	controller.NewVehicleController(s.engine, s.ucManager.VehicleUseCase(), authMiddleware)
 	controller.NewBrandController(s.engine, s.ucManager.BrandUseCase(), authMiddleware)
-	controller.NewCustomerController(s.engine, s.ucManager.CustomerUseCase())
-	controller.NewEmployeeController(s.engine, s.ucManager.EmployeeUseCase())
-	controller.NewTransactionController(s.engine, s.ucManager.TransactionUseCase())
+	controller.NewCustomerController(s.engine, s.ucManager.CustomerUseCase(), authMiddleware)
+	controller.NewEmployeeController(s.engine, s.ucManager.EmployeeUseCase(), authMiddleware)
+	controller.NewTransactionController(s.engine, s.ucManager.TransactionUseCase(), authMiddleware)
 	controller.NewAuthController(s.engine, s.authUseCase)
 }
 

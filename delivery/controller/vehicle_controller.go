@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/delivery/middleware"
 	"log"
 	"net/http"
 	"strings"
@@ -14,8 +15,9 @@ import (
 )
 
 type VehicleController struct {
-	router  *gin.Engine
-	usecase usecase.VehicleUseCase
+	router         *gin.Engine
+	usecase        usecase.VehicleUseCase
+	authMiddleware middleware.AuthTokenMiddleware
 	api.BaseApi
 }
 
@@ -107,16 +109,16 @@ func (v *VehicleController) deleteHandler(c *gin.Context) {
 	c.String(http.StatusNoContent, "")
 }
 
-func NewVehicleController(r *gin.Engine, usecase usecase.VehicleUseCase) *VehicleController {
+func NewVehicleController(r *gin.Engine, usecase usecase.VehicleUseCase, authMiddleware middleware.AuthTokenMiddleware) *VehicleController {
 	controller := VehicleController{
 		router:  r,
 		usecase: usecase,
 	}
 	r.GET("/vehicles", controller.listHandler)
 	r.GET("/vehicles/:id", controller.getByIDHandler)
-	r.GET("/vehicles/image/:id", controller.getImageByIDHandler)
-	r.POST("/vehicles", controller.createHandler)
-	r.PUT("/vehicles", controller.updateHandler)
-	r.DELETE("/vehicles/:id", controller.deleteHandler)
+	r.GET("/vehicles/image/:id", authMiddleware.RequireToken(), controller.getImageByIDHandler)
+	r.POST("/vehicles", authMiddleware.RequireToken(), controller.createHandler)
+	r.PUT("/vehicles", authMiddleware.RequireToken(), controller.updateHandler)
+	r.DELETE("/vehicles/:id", authMiddleware.RequireToken(), controller.deleteHandler)
 	return &controller
 }
