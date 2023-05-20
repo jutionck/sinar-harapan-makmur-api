@@ -41,7 +41,7 @@ func (v *vehicleRepository) List() ([]model.Vehicle, error) {
 
 func (v *vehicleRepository) Get(id string) (*model.Vehicle, error) {
 	var vehicle model.Vehicle
-	result := v.db.First(&vehicle, "id = ?", id)
+	result := v.db.Preload(clause.Associations).First(&vehicle, "id = ?", id)
 	if err := result.Error; err != nil {
 		return nil, err
 	}
@@ -81,7 +81,7 @@ func (v *vehicleRepository) Paging(requestQueryParams dto.RequestQueryParams) ([
 		orderQuery = fmt.Sprintf("%s %s", requestQueryParams.QueryParams.Order, sorting)
 	}
 
-	res := v.db.Order(orderQuery).Limit(paginationQuery.Take).Offset(paginationQuery.Skip).Find(&vehicles)
+	res := v.db.Order(orderQuery).Limit(paginationQuery.Take).Offset(paginationQuery.Skip).Preload(clause.Associations).Find(&vehicles)
 	if err := res.Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, dto.Paging{}, nil
