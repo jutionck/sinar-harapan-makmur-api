@@ -82,10 +82,10 @@ func NewCustomerController(r *gin.Engine, usecase usecase.CustomerUseCase, authM
 		router:  r,
 		usecase: usecase,
 	}
-	r.GET("/customers", authMiddleware.RequireToken(), controller.listHandler)
-	r.GET("/customers/:id", authMiddleware.RequireToken(), controller.getByIDHandler)
-	r.POST("/customers", authMiddleware.RequireToken(), controller.createHandler)
-	r.PUT("/customers", authMiddleware.RequireToken(), controller.updateHandler)
-	r.DELETE("/customers/:id", authMiddleware.RequireToken(), controller.deleteHandler)
+	r.GET("/api/v1/customers", authMiddleware.RequireToken(), controller.listHandler)
+	r.GET("/api/v1/customers/:id", authMiddleware.RequireToken(), controller.getByIDHandler)
+	r.POST("/api/v1/customers", authMiddleware.RequireToken(), controller.createHandler)
+	r.PUT("/api/v1/customers", authMiddleware.RequireToken(), controller.updateHandler)
+	r.DELETE("/api/v1/customers/:id", authMiddleware.RequireToken(), controller.deleteHandler)
 	return &controller
 }

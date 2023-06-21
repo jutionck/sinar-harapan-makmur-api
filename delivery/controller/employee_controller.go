@@ -82,10 +82,10 @@ func NewEmployeeController(r *gin.Engine, usecase usecase.EmployeeUseCase, authM
 		router:  r,
 		usecase: usecase,
 	}
-	r.GET("/employees", authMiddleware.RequireToken(), controller.listHandler)
-	r.GET("/employees/:id", authMiddleware.RequireToken(), controller.getByIDHandler)
-	r.POST("/employees", authMiddleware.RequireToken(), controller.createHandler)
-	r.PUT("/employees", authMiddleware.RequireToken(), controller.updateHandler)
-	r.DELETE("/employees/:id", authMiddleware.RequireToken(), controller.deleteHandler)
+	r.GET("/api/v1/employees", authMiddleware.RequireToken(), controller.listHandler)
+	r.GET("/api/v1/employees/:id", authMiddleware.RequireToken(), controller.getByIDHandler)
+	r.POST("/api/v1/employees", authMiddleware.RequireToken(), controller.createHandler)
+	r.PUT("/api/v1/employees", authMiddleware.RequireToken(), controller.updateHandler)
+	r.DELETE("/api/v1/employees/:id", authMiddleware.RequireToken(), controller.deleteHandler)
 	return &controller
 }

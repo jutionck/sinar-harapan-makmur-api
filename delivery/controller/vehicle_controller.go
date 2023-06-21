@@ -2,10 +2,11 @@ package controller
 
 import (
 	"encoding/json"
-	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/delivery/middleware"
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/delivery/middleware"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jutionck/golang-db-sinar-harapan-makmur-orm/delivery/api"
@@ -114,11 +115,11 @@ func NewVehicleController(r *gin.Engine, usecase usecase.VehicleUseCase, authMid
 		router:  r,
 		usecase: usecase,
 	}
-	r.GET("/vehicles", controller.listHandler)
-	r.GET("/vehicles/:id", controller.getByIDHandler)
-	r.GET("/vehicles/image/:id", authMiddleware.RequireToken(), controller.getImageByIDHandler)
-	r.POST("/vehicles", authMiddleware.RequireToken(), controller.createHandler)
-	r.PUT("/vehicles", authMiddleware.RequireToken(), controller.updateHandler)
-	r.DELETE("/vehicles/:id", authMiddleware.RequireToken(), controller.deleteHandler)
+	r.GET("/api/v1/vehicles", controller.listHandler)
+	r.GET("/api/v1/vehicles/:id", controller.getByIDHandler)
+	r.GET("/api/v1/vehicles/image/:id", authMiddleware.RequireToken(), controller.getImageByIDHandler)
+	r.POST("/api/v1/vehicles", authMiddleware.RequireToken(), controller.createHandler)
+	r.PUT("/api/v1/vehicles", authMiddleware.RequireToken(), controller.updateHandler)
+	r.DELETE("/api/v1/vehicles/:id", authMiddleware.RequireToken(), controller.deleteHandler)
 	return &controller
 }

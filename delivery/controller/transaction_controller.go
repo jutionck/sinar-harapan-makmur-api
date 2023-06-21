@@ -60,8 +60,8 @@ func NewTransactionController(r *gin.Engine, usecase usecase.TransactionUseCase,
 		router:  r,
 		usecase: usecase,
 	}
-	r.GET("/transactions", authMiddleware.RequireToken(), controller.listHandler)
-	r.GET("/transactions/:id", authMiddleware.RequireToken(), controller.getByIDHandler)
-	r.POST("/transactions", authMiddleware.RequireToken(), controller.createHandler)
+	r.GET("/api/v1/transactions", authMiddleware.RequireToken(), controller.listHandler)
+	r.GET("/api/v1/transactions/:id", authMiddleware.RequireToken(), controller.getByIDHandler)
+	r.POST("/api/v1/transactions", authMiddleware.RequireToken(), controller.createHandler)
 	return &controller
 }

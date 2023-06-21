@@ -36,6 +36,6 @@ func NewAuthController(r *gin.Engine, usecase usecase.AuthenticationUseCase) *Au
 		router:  r,
 		usecase: usecase,
 	}
-	r.POST("/login", controller.loginHandler)
+	r.POST("/api/v1/login", controller.loginHandler)
 	return &controller
 }

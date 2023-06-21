@@ -83,10 +83,10 @@ func NewBrandController(r *gin.Engine, usecase usecase.BrandUseCase, authMiddlew
 		usecase:        usecase,
 		authMiddleware: authMiddleware,
 	}
-	r.GET("/brands", controller.listHandler)
-	r.GET("/brands/:id", controller.getByIDHandler)
-	r.POST("/brands", authMiddleware.RequireToken(), controller.createHandler)
-	r.PUT("/brands", authMiddleware.RequireToken(), controller.updateHandler)
-	r.DELETE("/brands/:id", authMiddleware.RequireToken(), controller.deleteHandler)
+	r.GET("/api/v1/brands", controller.listHandler)
+	r.GET("/api/v1/brands/:id", controller.getByIDHandler)
+	r.POST("/api/v1/brands", authMiddleware.RequireToken(), controller.createHandler)
+	r.PUT("/api/v1/brands", authMiddleware.RequireToken(), controller.updateHandler)
+	r.DELETE("/api/v1/brands/:id", authMiddleware.RequireToken(), controller.deleteHandler)
 	return &controller
 }
